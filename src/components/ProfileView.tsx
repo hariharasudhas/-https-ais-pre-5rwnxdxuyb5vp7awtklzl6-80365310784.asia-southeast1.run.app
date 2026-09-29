@@ -240,6 +240,16 @@ export const ProfileView: React.FC<ProfileViewProps> = ({ onRequireAuth }) => {
         </div>
       </div>
 
+      {/* Owner Portal Link */}
+      <div className="pt-2 pb-4 text-center">
+        <button
+          onClick={() => setActiveTab('admin')}
+          className="text-xs text-neutral-400 hover:text-neutral-700 font-semibold transition-colors cursor-pointer inline-flex items-center gap-1"
+        >
+          <span>{isAdmin ? 'Go to MR.Premium Owner Dashboard →' : 'MR.Premium Store Owner Portal Access →'}</span>
+        </button>
+      </div>
+
       {/* Edit Profile Modal */}
       {isEditing && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm overflow-y-auto animate-fadeIn">

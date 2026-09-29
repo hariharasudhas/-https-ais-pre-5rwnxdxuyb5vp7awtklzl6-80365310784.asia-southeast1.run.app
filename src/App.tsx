@@ -150,6 +150,12 @@ function MainAppContent() {
             <span>Express Courier Tracking</span>
             <span>Secure 256-bit Checkout</span>
             <span>30-Day Hassle-Free Returns</span>
+            <button
+              onClick={() => setActiveTab('admin')}
+              className="font-bold text-neutral-700 hover:text-black underline cursor-pointer"
+            >
+              Owner Portal
+            </button>
           </div>
         </div>
       </footer>

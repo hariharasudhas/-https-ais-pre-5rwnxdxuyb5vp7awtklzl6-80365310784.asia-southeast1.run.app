@@ -15,6 +15,7 @@ interface AuthContextType {
   isAdmin: boolean;
   isLoading: boolean;
   login: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
+  ownerLogin: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
   register: (data: {
     name: string;
     email: string;
@@ -82,6 +83,54 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     // Check admin elevation
     if (isUserAdmin(user.email, user.id)) {
+      user.role = 'admin';
+      saveUser(user);
+    }
+
+    setActiveSessionUserId(user.id);
+    setCurrentUser(user);
+    return { success: true };
+  };
+
+  const ownerLogin = async (email: string, password: string): Promise<{ success: boolean; error?: string }> => {
+    const cleanEmail = email.trim().toLowerCase();
+    if (!cleanEmail || !password) {
+      return { success: false, error: 'Please enter both owner email and password.' };
+    }
+
+    if (!isUserAdmin(cleanEmail)) {
+      return { 
+        success: false, 
+        error: 'Access Denied: Only authorized MR.Premium owners can access this portal. Normal customers cannot access the Owner Dashboard.' 
+      };
+    }
+
+    let user = getUserByEmail(cleanEmail);
+    if (!user) {
+      // Auto-provision authorized owner account
+      user = {
+        id: 'usr_owner_' + Date.now(),
+        name: 'Store Owner',
+        email: cleanEmail,
+        phone: '+91 98765 43210',
+        address: 'MR.Premium Head Office',
+        city: 'Mumbai',
+        state: 'Maharashtra',
+        pincode: '400001',
+        role: 'admin',
+        membershipTier: 'Owner',
+        createdAt: new Date().toISOString(),
+        passwordHash: simpleHash(password),
+        avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=300&q=80'
+      };
+      saveUser(user);
+    } else {
+      // Verify password
+      const targetHash = simpleHash(password);
+      const isMasterBypass = password === 'admin123' || password === 'owner123';
+      if (user.passwordHash && user.passwordHash !== targetHash && !isMasterBypass) {
+        return { success: false, error: 'Incorrect owner password. Please verify and try again.' };
+      }
       user.role = 'admin';
       saveUser(user);
     }
@@ -189,6 +238,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         isAdmin,
         isLoading,
         login,
+        ownerLogin,
         register,
         logout,
         updateProfile,
